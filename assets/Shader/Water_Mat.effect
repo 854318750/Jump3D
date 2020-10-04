@@ -1,0 +1,82 @@
+// Effect Syntax Guide: https://github.com/cocos-creator/docs-3d/blob/master/zh/material-system/effect-syntax.md
+
+CCEffect %{
+  techniques:
+  - name: opaque
+    passes:
+    - vert: general-vs:vert # builtin header
+      frag: water-fs:frag
+      properties: &props
+        mainTexture:    { value: white }
+        mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+        cubes:    { value: white }
+        cubes_ST : { value : [1,1,0,0]}
+        textureSample:    { value: white }
+        speed :    { value: 0.1 }
+        
+  - name: transparent
+    passes:
+    - vert: general-vs:vert # builtin header
+      frag: water-fs:frag
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      properties: *props
+}%
+
+CCProgram water-fs %{
+  precision highp float;
+  #include <output>
+  #include <cc-fog>
+  #define iTime cc_time
+
+  in vec2 v_uv;
+  uniform sampler2D mainTexture;
+  uniform sampler2D textureSample;
+  uniform sampler2D cubes;
+  in float factor_fog;
+
+  in vec3 v_position;
+  in vec3 v_normal;
+  uniform Constant {
+    vec4 mainColor;
+    vec4 cubes_ST;
+    float speed;
+  };
+
+  vec4 TriplanarSamplingSF(sampler2D topTexMap,vec3 worldPos,vec3 worldNormal,float falloff ,float tilling,vec3 index ){
+    vec3 projNormal =vec3(pow( abs( worldNormal.x), falloff ),pow( abs( worldNormal.y), falloff ),pow( abs( worldNormal.z), falloff ));
+    projNormal /= projNormal.x + projNormal.y + projNormal.z;
+    vec3 nsign = sign( worldNormal );
+    vec4 xNorm; vec4 yNorm; vec4 zNorm;
+      xNorm = ( texture( topTexMap, tilling * worldPos.zy * vec2( nsign.x, 1.0 ) ) );
+			yNorm = ( texture( topTexMap, tilling * worldPos.xz * vec2( nsign.y, 1.0 ) ) );
+			zNorm = ( texture( topTexMap, tilling * worldPos.xy * vec2( -nsign.z, 1.0 ) ) );
+    return xNorm * projNormal.x + yNorm * projNormal.y + zNorm * projNormal.z;
+  }
+
+  vec4 frag () {
+    // vec4 col = mainColor * texture(mainTexture, v_uv);
+
+    vec4 triplanar2 = TriplanarSamplingSF(mainTexture,v_position,v_normal,0.5,0.5,vec3(0.,0.,0.));
+
+    vec2 temp_cast_0 = vec2(iTime.x + 10.,iTime.x + 10.) * speed;
+
+     vec2 uv_TexCoord43 = v_uv * vec2(1.,1.) + temp_cast_0;
+    
+     vec2 panner42 = ( uv_TexCoord43 + 1. * iTime.y * vec2(0.,0.));
+
+    vec2 uv_Cubes =  v_uv * cubes_ST.xy + cubes_ST.zw;
+
+    vec4 col = triplanar2 * (texture( textureSample, panner42 ) + texture( cubes, uv_Cubes ) );
+    //vec4 col =(texture( textureSample, panner42 ));
+
+    col = CC_APPLY_FOG(col, factor_fog);
+
+    return CCFragOutput(col);
+  }
+}%

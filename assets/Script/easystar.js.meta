@@ -1,0 +1,21 @@
+{
+  "ver": "4.0.1",
+  "importer": "javascript",
+  "imported": true,
+  "uuid": "6a9e93eb-e07e-4f68-8c60-5e833b099ffd",
+  "files": [
+    ".js",
+    ".trans"
+  ],
+  "subMetas": {},
+  "userData": {
+    "importAsPlugin": false,
+    "moduleId": "project:///assets/Script/easystar.js",
+    "importerSettings": 0,
+    "isPlugin": false,
+    "loadPluginInWeb": true,
+    "loadPluginInNative": true,
+    "loadPluginInEditor": false,
+    "simulateGlobals": true
+  }
+}

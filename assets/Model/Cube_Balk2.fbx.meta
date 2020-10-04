@@ -1,0 +1,75 @@
+{
+  "ver": "1.3.24",
+  "importer": "fbx",
+  "imported": true,
+  "uuid": "782f9cc3-e009-4691-bb6a-8533665894ae",
+  "files": [],
+  "subMetas": {
+    "e2349": {
+      "importer": "gltf-mesh",
+      "uuid": "782f9cc3-e009-4691-bb6a-8533665894ae@e2349",
+      "displayName": "",
+      "id": "e2349",
+      "name": "Mesh.mesh",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.1.0",
+      "imported": true,
+      "files": [
+        ".bin",
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "8d883": {
+      "importer": "gltf-material",
+      "uuid": "782f9cc3-e009-4691-bb6a-8533665894ae@8d883",
+      "displayName": "",
+      "id": "8d883",
+      "name": "lambert1.material",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.14",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "4c56b": {
+      "importer": "gltf-scene",
+      "uuid": "782f9cc3-e009-4691-bb6a-8533665894ae@4c56b",
+      "displayName": "",
+      "id": "4c56b",
+      "name": "Cube_Balk2.prefab",
+      "userData": {
+        "gltfIndex": 0
+      },
+      "ver": "1.0.11",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "imageMetas": [],
+    "redirect": "782f9cc3-e009-4691-bb6a-8533665894ae@4c56b",
+    "assetFinder": {
+      "meshes": [
+        "782f9cc3-e009-4691-bb6a-8533665894ae@e2349"
+      ],
+      "skeletons": [],
+      "textures": [],
+      "materials": [
+        "782f9cc3-e009-4691-bb6a-8533665894ae@8d883"
+      ],
+      "scenes": [
+        "782f9cc3-e009-4691-bb6a-8533665894ae@4c56b"
+      ]
+    }
+  }
+}
