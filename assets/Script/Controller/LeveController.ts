@@ -1,7 +1,11 @@
-import { _decorator, Component, Node, JsonAsset, Vec3, Prefab, loader, instantiate, Quat, CCObject } from 'cc';
+import { _decorator, Component, Node, JsonAsset, Vec3, Prefab, loader, instantiate, Quat, CCObject, Label } from 'cc';
 import { BalkCom } from '../Component/BalkCom';
+import { Label3D } from '../Component/Label3D';
 import { RotateCom } from '../Component/RotateCom';
+import { MyConfig } from '../MyConfig';
+import { Resources } from '../Resources';
 import CameraFollowController from './CameraFollowController';
+import { GameController } from './GameController';
 import { ThirdPersonController } from './ThirdPersonController';
 import { TouchController } from './TouchController';
 const { ccclass, property } = _decorator;
@@ -11,8 +15,11 @@ export class LeveController extends Component {
 
     public static instance: LeveController;
 
-    @property(JsonAsset)
-    levelJson: JsonAsset = null;
+
+    @property({
+        type: Node
+    })
+    labels: Node = null;
 
     //关卡中的节点字典
     levelMap: Map<string, Node> = new Map();
@@ -25,23 +32,75 @@ export class LeveController extends Component {
 
     paths: Array<Vec3> = [];
 
+    frontLabel: Label3D;
+    rightLabel: Label3D;
+    backLabel: Label3D;
+    leftLabel: Label3D;
 
+    /**
+     * 当前关卡加载
+     */
     curLevelModelIndex: number = 0;
+    /**
+     * 当前方块加载索引
+     */
     curBlockIndex: number = 0;
+    /**
+     * 当前加载长度
+     */
+    curLoadCount: number = 0;
+    /**
+     * 关卡总长度
+     */
+    levelZCount: number = 0;
+
+    levelJson: JsonAsset = null;
+
     onLoad() {
         LeveController.instance = this;
     }
+
     start() {
         this.blockClas.set('RotateCom', RotateCom);
         this.blockClas.set('BalkCom', BalkCom);
 
-        this.loadBlock(this.loadBlockOver.bind(this));
+        this.frontLabel = this.labels.children[0].getComponent(Label3D);
+        this.leftLabel = this.labels.children[1].getComponent(Label3D);
+        this.rightLabel = this.labels.children[2].getComponent(Label3D);
+        this.backLabel = this.labels.children[3].getComponent(Label3D);
     }
 
-    loadBlock(callBack: Function) {
+    loadConfig(level: number, callBack: Function) {
+        loader.loadRes("Config/Level_" + level, JsonAsset, (err: Error, json: JsonAsset) => {
+            if (err) {
+                return console.log(err);
+            }
+            this.levelJson = json;
+            let exportLevelModel = this.levelJson.json as ExportLevelModel;
+            for (let i = 0; i < exportLevelModel.list.length; i++) {
+                if (exportLevelModel.list[i].pn != 'Path') {
+                    for (let j = 0; j < exportLevelModel.list[i].list.length; j++) {
+                        this.levelZCount++;
+                    }
+                }
+            }
+
+            callBack && callBack();
+        })
+    }
+
+    public resetLabelStr(level: number) {
+        this.frontLabel.string = "关卡：" + level;
+        this.leftLabel.string = "关卡：" + level;
+        this.rightLabel.string = "关卡：" + level;
+        this.backLabel.string = "关卡：" + level;
+    }
+
+    public loadBlock(cp: Function, callBack: Function) {
         let exportLevelModel = this.levelJson.json as ExportLevelModel;
+        cp(this.curLoadCount, this.levelZCount);
+
         if (this.curLevelModelIndex >= exportLevelModel.list.length) {
-            console.log("生成完成");
             callBack && callBack();
         } else {
             let exportModel = exportLevelModel.list[this.curLevelModelIndex];
@@ -50,7 +109,7 @@ export class LeveController extends Component {
                     this.paths.push(new Vec3(exportModel.list[i].x, exportModel.list[i].y, exportModel.list[i].z));
                 }
                 this.curLevelModelIndex++;
-                this.loadBlock(callBack);
+                this.loadBlock(cp, callBack);
             } else {
                 let node = this.levelMap.get(exportModel.pn);
                 if (node == null) {
@@ -62,16 +121,22 @@ export class LeveController extends Component {
                 let blockModel = exportModel.list[this.curBlockIndex];
                 let fab = this.blockFab.get(blockModel.bn);
                 if (fab == null) {
-                    loader.loadRes("Prefab/" + blockModel.bn, Prefab, (err: any, fab: Prefab) => {
-                        this.blockFab.set(blockModel.bn, fab);
-                        this.createBlock(fab, node, blockModel);
-                        this.curBlockIndex++;
-                        if (this.curBlockIndex >= exportModel.list.length) {
-                            this.curBlockIndex = 0;
-                            this.curLevelModelIndex++;
+                    Resources.loadFab(blockModel.bn, {
+                        Success: (fab: Prefab) => {
+                            this.blockFab.set(blockModel.bn, fab);
+                            this.createBlock(fab, node, blockModel);
+                            this.curBlockIndex++;
+                            if (this.curBlockIndex >= exportModel.list.length) {
+                                this.curBlockIndex = 0;
+                                this.curLevelModelIndex++;
+                            }
+                            this.curLoadCount++;
+                            this.loadBlock(cp, callBack);
+                        },
+                        Fail: () => {
+                            GameController.instance.loadingView.showLoadFail();
                         }
-                        this.loadBlock(callBack);
-                    });
+                    })
                 } else {
                     if (fab == null) console.log(blockModel.bn);
                     this.createBlock(fab, node, blockModel);
@@ -80,13 +145,14 @@ export class LeveController extends Component {
                         this.curBlockIndex = 0;
                         this.curLevelModelIndex++;
                     }
-                    this.loadBlock(callBack);
+                    this.curLoadCount++;
+                    this.loadBlock(cp, callBack);
                 }
             }
         }
     }
 
-    createBlock(fab: Prefab, parcent: Node, model: Block) {
+    public createBlock(fab: Prefab, parcent: Node, model: Block) {
         let clas = this.blockClas.get(model.cn);
         let n = instantiate(fab);
         parcent.addChild(n);
@@ -107,7 +173,7 @@ export class LeveController extends Component {
         }
     }
 
-    setBlockMap(x, z, node: Node) {
+    public setBlockMap(x, z, node: Node) {
         let key = x * 100000 + z;
         this.blockMap.set(key, node);
     }
@@ -121,33 +187,9 @@ export class LeveController extends Component {
         return this.blockMap.get(key);
     }
 
-    loadBlockOver() {
-        this.loadPlayer();
-    }
-
-    loadPlayer() {
-        loader.loadRes('Prefab/Red', Prefab, (err, fab: Prefab) => {
-            if (err) return;
-
-            let node = instantiate(fab);
-            let parcent = this.levelMap.get('Block');
-            this.node.addChild(node);
-
-            let pos = parcent.children[0].worldPosition.clone().add3f(0, 2, 0);
-            node.setWorldPosition(pos);
-            
-            let ctl = node.getComponent(ThirdPersonController);
-            ctl.setPaths(this.paths);
-            ctl.setStartPos(pos);
-            let nor = this.paths[1].clone().subtract(this.paths[0]).normalize();
-            ctl.LookAt(nor.clone());
-            ctl.setRotate(nor.clone());
-
-
-            CameraFollowController.instance.setTarget(node);
-            CameraFollowController.instance.setRotate(nor.clone());
-            
-            TouchController.instance.setTarget(ctl);
-        });
+    public clearLoadCount() {
+        this.curLevelModelIndex = 0;
+        this.curBlockIndex = 0;
+        this.curLoadCount = 0;
     }
 }

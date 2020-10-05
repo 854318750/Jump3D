@@ -256,7 +256,7 @@
     "_allowSleep": true,
     "_linearDamping": 0.1,
     "_angularDamping": 0.1,
-    "_fixedRotation": false,
+    "_fixedRotation": true,
     "_isKinematic": false,
     "_useGravity": true,
     "_linearFactor": {
@@ -281,7 +281,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "moveSpeed": 5,
+    "moveSpeed": 3,
     "body": {
       "__id__": 9
     },

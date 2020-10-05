@@ -1,6 +1,38 @@
 {
   "modules": {
-    "cache": {},
+    "cache": {
+      "Audio": {
+        "value": true
+      },
+      "Core": {
+        "value": true
+      },
+      "Graphcis API": {
+        "value": true
+      },
+      "Particle System": {
+        "value": true
+      },
+      "Physics": {
+        "option": 0,
+        "value": true
+      },
+      "Terrain": {
+        "value": false
+      },
+      "Tween": {
+        "value": true
+      },
+      "UI": {
+        "value": true
+      },
+      "WebGL 1.0": {
+        "value": true
+      },
+      "WebGL 2.0": {
+        "value": true
+      }
+    },
     "includeModules": [
       "base",
       "gfx-webgl",
@@ -10,8 +42,7 @@
       "physics-cannon",
       "physics-framework",
       "audio",
-      "tween",
-      "terrain"
+      "tween"
     ]
   },
   "__version__": "1.0.1"

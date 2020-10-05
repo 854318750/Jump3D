@@ -41,7 +41,7 @@ export class ThirdPersonController extends BodyBase {
     curMoveDir: Vec3 = new Vec3();
 
     _curRotate: Vec3 = new Vec3(0, 0, 1);
-    
+
     /**
      * 是否跳跃
      */
@@ -51,10 +51,30 @@ export class ThirdPersonController extends BodyBase {
      */
     startPos: Vec3 = new Vec3();
 
+
+    public isMe: boolean = false;
+
     onLoad() {
         let collider = this.getComponent(Collider);
 
         collider.on('onCollisionEnter', this.onCollisionEnter, this);
+    }
+
+    public init(paths: Array<Vec3>, startPos: Vec3, isMe: boolean = false) {
+        this.node.setWorldPosition(startPos);
+
+        this.setPaths(paths);
+        this.setStartPos(startPos);
+        this.isMe = isMe;
+        let nor = this.paths[1].clone().subtract(this.paths[0]).normalize();
+
+        this.LookAt(nor);
+
+        if (isMe) {
+            CameraFollowController.instance.setTarget(this.node);
+        }
+
+        this.resetRotate();
     }
 
     public setPaths(ary: Array<Vec3>) {
@@ -102,17 +122,27 @@ export class ThirdPersonController extends BodyBase {
             this.ballNode.eulerAngles = this.ballNode.eulerAngles.add3f(this.curMoveDir.x, 0, 0);
             this.ball.eulerAngles = this.ball.eulerAngles.add3f(0, 0, this.curMoveDir.z);
 
-            if (Vec3.distance(this.node.getWorldPosition(), this.paths[this.pathIndex - 1]) >= 1) {
-                if (Vec3.distance(this.node.getWorldPosition(), this.paths[this.pathIndex]) <= 1) {
+            let pos = this.node.getWorldPosition();
+            pos.y = this.paths[this.pathIndex - 1].y;
+
+            if (Vec3.distance(pos, this.paths[this.pathIndex - 1]) >= 1) {
+                if (Vec3.distance(pos, this.paths[this.pathIndex]) <= 1) {
 
                     let p1 = this.paths[this.pathIndex + 1];
                     let p2 = this.paths[this.pathIndex];
 
-                    CameraFollowController.instance.setRotate(p1.clone().subtract(p2).normalize());
+                    let nor = p1.clone().subtract(p2).normalize();
+                    if (this.isMe) {
+                        CameraFollowController.instance.setRotate(nor);
+                    }
 
-                    this._curRotate = p1.clone().subtract(p2).normalize();
+                    this._curRotate = nor;
 
                     this.pathIndex++;
+
+                    if (this.pathIndex + 1 >= this.paths.length) {
+                        console.log("游戏通关");
+                    }
                 }
             }
 
@@ -120,7 +150,6 @@ export class ThirdPersonController extends BodyBase {
             let q2 = new Quat();
             Quat.slerp(q2, this.node.getWorldRotation(), q, 10 * dt);
             this.node.rotation = q2;
-
         }
 
         if (this.node.worldPosition.y <= 0) {
@@ -133,14 +162,23 @@ export class ThirdPersonController extends BodyBase {
         this.body.setAngularVelocity(new Vec3());
     }
 
+    resetRotate() {
+        let p1 = this.paths[1];
+        let p2 = this.paths[0];
+        let nor = p1.clone().subtract(p2).normalize();
+
+        if (this.isMe) {
+            CameraFollowController.instance.setRotate(nor);
+        }
+
+        this.setRotate(nor);
+    }
+
     myClear() {
         this.isJump = false;
         this.node.setWorldPosition(this.startPos);
 
-        let p1 = this.paths[1];
-        let p2 = this.paths[0];
-        CameraFollowController.instance.setRotate(p1.clone().subtract(p2).normalize());
-        this.setRotate(p1.clone().subtract(p2).normalize());
+        this.resetRotate();
 
         this.pathIndex = 1;
         this.clearVelocity();

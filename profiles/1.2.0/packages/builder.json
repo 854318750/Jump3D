@@ -22,7 +22,7 @@
           "packAutoAtlas": true,
           "packages": {
             "web-mobile": {
-              "orientation": "landscape",
+              "orientation": "portrait",
               "polyfills": {
                 "asyncFunctions": true
               }
@@ -39,12 +39,12 @@
           "sourceMaps": false,
           "startScene": "5eea4f14-21f9-4637-ad06-88636d799545"
         },
-        "message": "2020/10/4 20:51 Build success in 103795 ms!",
+        "message": "2020/10/4 21:52 Build success in 10489 ms!",
         "logMap": {
           "log": 24,
-          "warn": 5,
+          "warn": 4,
           "error": 0,
-          "debug": 73
+          "debug": 72
         }
       }
     }

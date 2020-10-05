@@ -6,10 +6,10 @@
   },
   "general": {
     "designResolution": {
-      "width": 1334,
-      "height": 750,
-      "fitWidth": false,
-      "fitHeight": true
+      "width": 750,
+      "height": 1334,
+      "fitWidth": true,
+      "fitHeight": false
     }
   }
 }
