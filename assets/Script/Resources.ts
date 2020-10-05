@@ -66,11 +66,14 @@ export class Resources {
     static resLoadCount: Map<string, number> = new Map();
     static resLoadCallBacks: Map<string, Array<AdCallBack>> = new Map();
 
+    static GameClearanceView: string = 'GameClearanceView';
+
     /**
      * 预加载需要用到的界面
      */
-    static preloadFabs() {
+    static preloadFabs(c: Function, p: Function) {
         let list = [];
+        list.push(this.GameClearanceView);
 
         for (let i = 0; i < list.length; i++) {
             this.loadFab(list[i], {

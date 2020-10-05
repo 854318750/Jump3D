@@ -45,16 +45,21 @@ export class GameController extends Component {
         })
 
         LeveController.instance.loadConfig(MyConfig.CurLevel, () => {
-            this.loadingView.setPercent(0.1);
-            this.loadBlock();
+            this.loadViewFabs();
+            // this.loadingView.setPercent(0.1);
+            // this.loadBlock();
         })
+    }
+
+    loadViewFabs(){
+        // Resources.preloadFabs()
     }
 
     loadBlock() {
         this.loadingView.setCallBack(() => {
             LeveController.instance.clearLoadCount();
             this.loadBlock();
-        })
+        });
 
         LeveController.instance.resetLabelStr(MyConfig.CurLevel);
         LeveController.instance.loadBlock((c, z) => {
@@ -88,7 +93,7 @@ export class GameController extends Component {
                 }, 100);
             },
             Fail: () => {
-
+                this.loadingView.showLoadFail();
             }
         })
     }

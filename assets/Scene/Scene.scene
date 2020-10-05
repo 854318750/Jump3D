@@ -1195,7 +1195,7 @@
     },
     "_depth": 1,
     "_stencil": 0,
-    "_clearFlags": 7,
+    "_clearFlags": 14,
     "_rect": {
       "__type__": "cc.Rect",
       "x": 0,
@@ -1241,9 +1241,9 @@
     "__type__": "cc.AmbientInfo",
     "_skyColor": {
       "__type__": "cc.Color",
-      "r": 51,
+      "r": 0,
       "g": 128,
-      "b": 204,
+      "b": 255,
       "a": 1
     },
     "_skyIllum": 20000,
@@ -1286,10 +1286,12 @@
   },
   {
     "__type__": "cc.SkyboxInfo",
-    "_envmap": null,
+    "_envmap": {
+      "__uuid__": "3f5bdfc6-4227-4f4d-b865-16247394ca31"
+    },
     "_isRGBE": false,
-    "_enabled": false,
-    "_useIBL": false
+    "_enabled": true,
+    "_useIBL": true
   },
   {
     "__type__": "cc.FogInfo",
